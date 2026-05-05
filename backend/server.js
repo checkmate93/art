@@ -7,13 +7,24 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ FIX: homepage route
+// =======================
+// 🏠 HEALTH CHECK ROUTE
+// =======================
 app.get("/", (req, res) => {
     res.send("🎨 Art Curator AI backend is running");
 });
 
+// =======================
+// 🤖 AI ROUTE
+// =======================
 app.post("/api/groq", async (req, res) => {
     const { title, artist } = req.body;
+
+    if (!title || !artist) {
+        return res.status(400).json({
+            error: "Missing title or artist"
+        });
+    }
 
     try {
         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -29,8 +40,11 @@ app.post("/api/groq", async (req, res) => {
                         role: "system",
                         content: `
 Είσαι κορυφαίος ιστορικός τέχνης.
-Ξεκινάς πάντα με fun fact, μετά ανάλυση και μετά context.
 Δεν γράφεις γενικότητες.
+Πάντα:
+1. Fun Fact πρώτο
+2. Ανάλυση έργου
+3. Context εποχής
 `
                     },
                     {
@@ -39,10 +53,12 @@ app.post("/api/groq", async (req, res) => {
 Έργο: "${title}"
 Καλλιτέχνης: "${artist}"
 
+Δομή απάντησης:
 🎯 Fun Fact:
 🎨 Ανάλυση:
 🧠 Context:
-150-220 λέξεις
+
+150-220 λέξεις, συγκεκριμένα στοιχεία.
 `
                     }
                 ],
@@ -52,12 +68,33 @@ app.post("/api/groq", async (req, res) => {
         });
 
         const data = await response.json();
+
+        // =======================
+        // ❗ SAFE RESPONSE CHECK
+        // =======================
+        if (!data || !data.choices || !data.choices[0]) {
+            console.error("Groq error response:", data);
+            return res.status(500).json({
+                error: "Invalid AI response",
+                raw: data
+            });
+        }
+
         res.json(data);
 
     } catch (err) {
-        res.status(500).json({ error: "AI error" });
+        console.error("Server error:", err);
+        res.status(500).json({
+            error: "AI request failed"
+        });
     }
 });
 
+// =======================
+// 🚀 START SERVER
+// =======================
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Server running on " + PORT));
+
+app.listen(PORT, () => {
+    console.log("Server running on port " + PORT);
+});
