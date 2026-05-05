@@ -189,7 +189,7 @@ async function getAIFact(title, artist) {
     container.style.display = "block";
 
     try {
-        fetch("https://art-b2pg.onrender.com/api/groq", {
+       fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${GROQ_API_KEY}`,
