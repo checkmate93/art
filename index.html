@@ -24,20 +24,26 @@ body {
     margin: 0;
 }
 
+/* 🔥 CARD FLEX FIX */
 .card { 
     background: var(--card);
     padding: 25px;
     border-radius: 20px;
     width: 90%;
     max-width: 800px;
+    min-height: 90vh;
+
+    display: flex;
+    flex-direction: column;
+
     text-align: center;
 }
 
 h2 {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
-select, button {
+select {
     width: 100%;
     padding: 12px;
     margin-top: 10px;
@@ -45,16 +51,7 @@ select, button {
     border: none;
 }
 
-button {
-    background: var(--accent);
-    font-weight: bold;
-    cursor: pointer;
-}
-
-button:disabled {
-    opacity: 0.5;
-}
-
+/* IMAGE */
 #art-image {
     width: 100%;
     margin-top: 20px;
@@ -62,6 +59,7 @@ button:disabled {
     display: none;
 }
 
+/* AI BOX */
 .ai-section {
     margin-top: 20px;
     text-align: left;
@@ -73,6 +71,27 @@ button:disabled {
 
 #ai-fact {
     white-space: pre-line;
+}
+
+/* 🔥 PUSH BUTTON DOWN */
+.spacer {
+    flex: 1;
+}
+
+/* BUTTON */
+button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: none;
+    background: var(--accent);
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+button:disabled {
+    opacity: 0.5;
 }
 </style>
 </head>
@@ -90,13 +109,16 @@ button:disabled {
         <option value="Surrealism">Surrealism</option>
     </select>
 
-    <button id="next-btn" onclick="getArt()">ΑΝΑΚΑΛΥΨΗ</button>
-
     <img id="art-image">
 
     <div class="ai-section" id="ai-container">
         <p id="ai-fact"></p>
     </div>
+
+    <!-- 🔥 pushes button to bottom -->
+    <div class="spacer"></div>
+
+    <button id="next-btn" onclick="getArt()">ΕΠΟΜΕΝΟ</button>
 </div>
 
 <script>
@@ -118,12 +140,12 @@ async function getArt() {
         const data = await res.json();
 
         const valid = data.data?.filter(a => a.image_id);
-
         if (!valid || valid.length === 0) throw new Error("No art found");
 
         const art = valid[Math.floor(Math.random() * valid.length)];
 
         document.querySelector("h2").innerText = art.title;
+
         img.src = `https://www.artic.edu/iiif/2/${art.image_id}/full/800,/0/default.jpg`;
         img.style.display = "block";
 
@@ -158,10 +180,8 @@ async function getAI(title, artist) {
 
         const data = await res.json();
 
-        // 🔥 SAFE CHECK (πολύ σημαντικό)
         if (!data || !data.choices || !data.choices[0]) {
-            console.log("Bad response:", data);
-            text.innerText = "AI error (no valid response)";
+            text.innerText = "AI error";
             return;
         }
 
@@ -173,7 +193,6 @@ async function getAI(title, artist) {
             .replace("🧠 Context:", "<br><br><b>🧠 Context:</b><br>");
 
     } catch (e) {
-        console.error(e);
         text.innerText = "AI error...";
     }
 }
