@@ -117,7 +117,10 @@ async function getArt() {
         const res = await fetch(`https://api.artic.edu/api/v1/artworks/search?q=${category}&page=${page}&limit=12&fields=title,artist_title,image_id`);
         const data = await res.json();
 
-        const valid = data.data.filter(a => a.image_id);
+        const valid = data.data?.filter(a => a.image_id);
+
+        if (!valid || valid.length === 0) throw new Error("No art found");
+
         const art = valid[Math.floor(Math.random() * valid.length)];
 
         document.querySelector("h2").innerText = art.title;
@@ -131,6 +134,7 @@ async function getArt() {
         };
 
     } catch (err) {
+        console.error(err);
         btn.innerText = "ΞΑΝΑ";
         btn.disabled = false;
     }
@@ -154,6 +158,13 @@ async function getAI(title, artist) {
 
         const data = await res.json();
 
+        // 🔥 SAFE CHECK (πολύ σημαντικό)
+        if (!data || !data.choices || !data.choices[0]) {
+            console.log("Bad response:", data);
+            text.innerText = "AI error (no valid response)";
+            return;
+        }
+
         let content = data.choices[0].message.content;
 
         text.innerHTML = content
@@ -162,6 +173,7 @@ async function getAI(title, artist) {
             .replace("🧠 Context:", "<br><br><b>🧠 Context:</b><br>");
 
     } catch (e) {
+        console.error(e);
         text.innerText = "AI error...";
     }
 }
