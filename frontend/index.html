@@ -189,7 +189,7 @@ async function getAIFact(title, artist) {
     container.style.display = "block";
 
     try {
-        const response = await fetch("https://YOUR-APP.onrender.com/api/groq", {
+        fetch("https://art-b2pg.onrender.com/api/groq", {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${GROQ_API_KEY}`,
