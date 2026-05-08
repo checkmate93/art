@@ -87,6 +87,7 @@ body {
     font-size: 18px; 
     cursor: pointer;
     align-self: center; 
+    transition: all 0.3s;
 }
 
 #enter-canvas-btn:hover { background: var(--accent); color: var(--bg); }
@@ -124,9 +125,9 @@ select {
     box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
+    scroll-behavior: smooth; /* Ομαλό scroll CSS */
 }
 
-/* Custom Scrollbar για TV */
 .info-box::-webkit-scrollbar { width: 6px; }
 .info-box::-webkit-scrollbar-track { background: transparent; }
 .info-box::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
@@ -146,10 +147,22 @@ select {
 
 #ai-fact { 
     font-size: 20px; 
-    line-height: 1.5;
+    line-height: 1.6;
     color: var(--text-muted);
 }
-#ai-fact strong { color: white; }
+
+/* --- ΚΙΝΗΜΑΤΟΓΡΑΦΙΚΟ FADE-IN EFFECT --- */
+.fade-line {
+    opacity: 0;
+    transform: translateY(15px); /* Ξεκινάει λίγο πιο κάτω */
+    transition: opacity 1.2s ease-out, transform 1.2s ease-out; /* Απαλό ανέβασμα */
+    margin-bottom: 12px; /* Κενό ανάμεσα στις γραμμές */
+}
+.fade-line.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+.fade-line strong { color: white; }
 
 .btn-group {
     flex-shrink: 0; 
@@ -166,6 +179,7 @@ button.control-btn {
     font-size: 18px; 
     font-weight: bold;
     cursor: pointer; 
+    transition: background 0.3s;
 }
 
 #next-btn { background: var(--accent); color: #0f172a; }
@@ -265,47 +279,58 @@ function toggleAutoMode() {
     }
 }
 
-/* --- ΜΕΤΑΒΛΗΤΗ ΓΙΑ ΤΟ TYPEWRITER ΕΛΕΓΧΟ --- */
+/* --- ΧΑΛΑΡΩΤΙΚΟ FADE-IN ΓΡΑΜΜΩΝ & AUTO-SCROLL --- */
 let typingSession = 0; 
 
-/* --- TYPEWRITER & AUTO-SCROLL ΛΟΓΙΚΗ --- */
-function typeWriterHTML(element, htmlString, speed = 15) {
-    typingSession++; // Νέο session ID
+function revealLines(element, textString) {
+    typingSession++; 
     const currentSession = typingSession; 
     element.innerHTML = "";
     
     const container = document.getElementById('scrollable-info');
+    
+    // Μορφοποίηση και χωρισμός του κειμένου σε γραμμές/παραγράφους
+    let formatted = textString
+        .replace(/🎯 Fun Fact:/g, "<strong>🎯 Fun Fact:</strong>")
+        .replace(/🎨 Ανάλυση:/g, "<strong>🎨 Ανάλυση:</strong>")
+        .replace(/🧠 Context:/g, "<strong>🧠 Context:</strong>");
+        
+    // Σπάμε το κείμενο όπου υπάρχει αλλαγή γραμμής (enter)
+    let blocks = formatted.split('\n').filter(b => b.trim() !== "");
+    
+    // Δημιουργούμε τα κρυφά Divs
+    let domElements = blocks.map(block => {
+        let div = document.createElement('div');
+        div.className = 'fade-line';
+        div.innerHTML = block;
+        element.appendChild(div);
+        return div;
+    });
+    
     let i = 0;
-
-    function type() {
-        // Αν ο χρήστης πάτησε "Επόμενο", η συνεδρία αλλάζει και το γράψιμο σταματάει αμέσως!
-        if (currentSession !== typingSession) return;
-
-        if (i < htmlString.length) {
-            let char = htmlString.charAt(i);
+    function showNext() {
+        if (currentSession !== typingSession) return; // Ακύρωση αν πατήθηκε 'Επόμενο'
+        
+        if (i < domElements.length) {
+            domElements[i].classList.add('visible');
             
-            // Αν βρει HTML tag (π.χ. <strong>) το προσθέτει ολόκληρο κατευθείαν για να μη σπάσει η μορφή
-            if (char === '<') {
-                let tagEnd = htmlString.indexOf('>', i);
-                if (tagEnd !== -1) {
-                    element.innerHTML += htmlString.substring(i, tagEnd + 1);
-                    i = tagEnd + 1;
-                } else {
-                    element.innerHTML += char;
-                    i++;
-                }
-            } else {
-                element.innerHTML += char;
-                i++;
-            }
-
-            // Αυτόματο scroll προς τα κάτω καθώς γράφει!
-            container.scrollTop = container.scrollHeight;
-
-            setTimeout(type, speed);
+            // Βελούδινο scroll προς τα κάτω με μια μικρή καθυστέρηση
+            setTimeout(() => {
+                container.scrollTo({
+                    top: container.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }, 100); 
+            
+            // Υπολογισμός χρόνου για να διαβαστεί η γραμμή χαλαρά
+            // Βάση: 1.5 δευτερόλεπτο ελάχιστο + λίγος χρόνος ανάλογα τα γράμματα
+            let delay = 1500 + (domElements[i].innerText.length * 15);
+            i++;
+            setTimeout(showNext, delay);
         }
     }
-    type();
+    
+    setTimeout(showNext, 300); // Ξεκινάει 0.3s αφού φορτώσει η εικόνα
 }
 
 /* --- API & ΦΟΡΤΩΣΗ --- */
@@ -318,7 +343,7 @@ async function getArt(retryCount = 0) {
     const factEl = document.getElementById('ai-fact');
 
     if (retryCount === 0) {
-        typingSession++; // Σταματάει το προηγούμενο γράψιμο αμέσως
+        typingSession++; // Ακυρώνει τυχόν fade-in που έτρεχε
         nextBtn.disabled = true; catSelect.disabled = true;
         nextBtn.innerText = "..."; titleEl.innerText = "Αναζήτηση πίνακα..."; factEl.innerText = "";
         exitCanvas(); 
@@ -359,9 +384,8 @@ async function getArt(retryCount = 0) {
 async function getAIFact(title, artist) {
     const factEl = document.getElementById('ai-fact');
     
-    // Σταματάμε το typing και γράφουμε στατικά ότι φορτώνει
     typingSession++; 
-    factEl.innerHTML = "<em>Ο AI Curator γράφει...</em>";
+    factEl.innerHTML = "<em>Ο AI Curator μελετά το έργο...</em>";
 
     try {
         const response = await fetch("https://art-b2pg.onrender.com/api/groq", {
@@ -372,13 +396,8 @@ async function getAIFact(title, artist) {
         if (!response.ok) throw new Error("AI Error");
         let text = (await response.json()).choices[0].message.content;
         
-        // Μορφοποίηση κειμένου
-        let formattedText = text.replace("🎯 Fun Fact:", "<strong>🎯 Fun Fact:</strong><br>")
-                                .replace("🎨 Ανάλυση:", "<br><br><strong>🎨 Ανάλυση:</strong><br>")
-                                .replace("🧠 Context:", "<br><br><strong>🧠 Context:</strong><br>");
-        
-        // Εκκίνηση Typewriter Effect!
-        typeWriterHTML(factEl, formattedText, 15); // 15ms ανά γράμμα είναι ιδανικό για διάβασμα
+        // Καλούμε το Χαλαρωτικό Fade-In
+        revealLines(factEl, text);
 
     } catch {
         factEl.innerText = "Αδυναμία σύνδεσης. Πατήστε Επόμενο!";
