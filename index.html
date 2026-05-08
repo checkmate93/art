@@ -41,21 +41,21 @@ body {
 #main-grid {
     display: flex;
     flex-direction: row; 
-    gap: 3vw; 
+    gap: 2vw; /* Μικρότερο κενό για να κερδίσουμε χώρο */
     height: 100%;
     width: 100%;
 }
 
 /* =========================================
-   3. ΑΡΙΣΤΕΡΗ ΣΤΗΛΗ (Εικόνα)
+   3. ΑΡΙΣΤΕΡΗ ΣΤΗΛΗ (Εικόνα - ΤΩΡΑ ΤΕΡΑΣΤΙΑ: 65%)
 ========================================= */
 .left-panel {
-    flex: 6; 
+    flex: 6.5; /* Μεγάλωσε η αναλογία! */
     display: flex;
     flex-direction: column;
     background: var(--panel-bg);
     border-radius: 15px;
-    padding: 15px; 
+    padding: 10px; /* Ελάχιστο περιθώριο για μέγιστη εικόνα */
     box-shadow: var(--shadow);
     height: 100%;
 }
@@ -78,7 +78,7 @@ body {
 
 #enter-canvas-btn {
     flex-shrink: 0; 
-    margin-top: 15px;
+    margin-top: 10px;
     background: rgba(15, 23, 42, 0.8);
     color: white;
     border: 1px solid var(--accent);
@@ -92,10 +92,10 @@ body {
 #enter-canvas-btn:hover { background: var(--accent); color: var(--bg); }
 
 /* =========================================
-   4. ΔΕΞΙΑ ΣΤΗΛΗ (Controls)
+   4. ΔΕΞΙΑ ΣΤΗΛΗ (Controls - 35%)
 ========================================= */
 .right-panel {
-    flex: 4; 
+    flex: 3.5; 
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -233,7 +233,7 @@ button.control-btn {
 
             <div class="btn-group">
                 <button id="next-btn" class="control-btn" onclick="getArt()">ΕΠΟΜΕΝΟ</button>
-                <button id="auto-btn" class="control-btn" onclick="toggleAutoMode()">⏱️ AUTO (1.5λ)</button>
+                <button id="auto-btn" class="control-btn" onclick="toggleAutoMode()">⏱️ AUTO (3λ)</button>
             </div>
         </div>
 
@@ -249,22 +249,37 @@ function enterCanvas() {
 }
 function exitCanvas() { document.getElementById('fullscreen-overlay').style.display = 'none'; }
 
-/* --- AUTO MODE --- */
+/* --- AUTO MODE (Διορθωμένο και στα 3 λεπτά) --- */
 let autoInterval;
 let isAutoMode = false;
+
 function toggleAutoMode() {
     const btn = document.getElementById('auto-btn');
     isAutoMode = !isAutoMode;
+    
     if (isAutoMode) {
-        btn.classList.add('active'); btn.innerText = "🛑 ΔΙΑΚΟΠΗ";
-        getArt(); autoInterval = setInterval(getArt, 90000); 
+        btn.classList.add('active'); 
+        btn.innerText = "🛑 ΔΙΑΚΟΠΗ";
+        getArt(); 
+        
+        // Καθαρίζουμε για σιγουριά τυχόν παλιά interval πριν βάλουμε το νέο
+        if (autoInterval) clearInterval(autoInterval);
+        
+        // 3 λεπτά = 180.000 milliseconds
+        autoInterval = setInterval(getArt, 180000); 
     } else {
-        btn.classList.remove('active'); btn.innerText = "⏱️ AUTO (1.5λ)";
-        clearInterval(autoInterval);
+        btn.classList.remove('active'); 
+        btn.innerText = "⏱️ AUTO (3λ)";
+        
+        // ΕΔΩ ΗΤΑΝ ΤΟ ΚΛΕΙΔΙ: Καθαρίζει το ρολόι με απόλυτη σιγουριά
+        if (autoInterval) {
+            clearInterval(autoInterval);
+            autoInterval = null;
+        }
     }
 }
 
-/* --- ΧΑΛΑΡΩΤΙΚΟ TYPEWRITER (ΜΙΣΗ ΤΑΧΥΤΗΤΑ / 5sec ΠΑΥΣΗ) --- */
+/* --- ΧΑΛΑΡΩΤΙΚΟ TYPEWRITER (Αργό & με παύσεις) --- */
 let typingSession = 0; 
 
 function typeWriterHTML(element, htmlString) {
@@ -280,8 +295,6 @@ function typeWriterHTML(element, htmlString) {
 
         if (i < htmlString.length) {
             let char = htmlString.charAt(i);
-            
-            // ΜΙΣΗ ΤΑΧΥΤΗΤΑ: Το 40ms έγινε 80ms (πιο αργό και νωχελικό)
             let delay = 80; 
 
             if (char === '<') {
@@ -298,17 +311,11 @@ function typeWriterHTML(element, htmlString) {
                 element.innerHTML += char;
                 i++;
                 
-                // --- ΟΙ ΑΝΑΣΕΣ ΠΟΥ ΖΗΤΗΣΕΣ ---
-                // Τελεία, Θαυμαστικό, Ερωτηματικό: 5 ΟΛΟΚΛΗΡΑ ΔΕΥΤΕΡΟΛΕΠΤΑ (5000ms)
                 if (char === '.' || char === '!' || char === '?') {
                     delay += 5000; 
-                } 
-                // Άνω κάτω τελεία (πχ μετά το "Ανάλυση:"): 2.5 δευτερόλεπτα
-                else if (char === ':') {
+                } else if (char === ':') {
                     delay += 2500;
-                }
-                // Κόμμα: Μικρή ανάσα
-                else if (char === ',') {
+                } else if (char === ',') {
                     delay += 300; 
                 }
             }
