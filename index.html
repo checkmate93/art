@@ -31,7 +31,7 @@ body {
 }
 
 /* =========================================
-   2. TV SAFE AREA & LAYOUT (Desktop/TV)
+   2. TV SAFE AREA & LAYOUT
 ========================================= */
 #tv-safe-area {
     padding: 3vh 3vw; 
@@ -151,19 +151,20 @@ select {
 }
 #ai-fact strong { color: white; }
 
+/* ΝΕΑ ΔΙΑΤΑΞΗ ΓΙΑ 3 ΚΟΥΜΠΙΑ */
 .btn-group {
     flex-shrink: 0; 
     display: flex;
     flex-direction: row; 
-    gap: 15px;
+    gap: 10px; /* Μίκρυνα το κενό για να χωράνε τα 3 */
 }
 
 button.control-btn {
     flex: 1; 
     border: none; 
-    padding: 15px 5px; 
+    padding: 12px 2px; /* Λιγότερο padding αριστερά-δεξιά */
     border-radius: 10px; 
-    font-size: 18px; 
+    font-size: 16px; /* Ελαφρώς μικρότερα για να χωράνε */
     font-weight: bold;
     cursor: pointer; 
 }
@@ -173,6 +174,9 @@ button.control-btn {
 
 #auto-btn { background: #334155; color: white; border: 1px solid #475569; }
 #auto-btn.active { background: #ef4444; border-color: #ef4444; }
+
+#show-all-btn { background: #334155; color: white; border: 1px solid #475569; }
+#show-all-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* =========================================
    5. ΛΕΙΤΟΥΡΓΙΑ ΚΑΜΒΑ
@@ -232,8 +236,8 @@ button.control-btn {
     .artist-name { font-size: 16px; margin-bottom: 10px; }
     #ai-fact { font-size: 16px; line-height: 1.5; }
 
-    .btn-group { gap: 10px; }
-    button.control-btn { font-size: 15px; padding: 12px 5px; }
+    .btn-group { gap: 8px; }
+    button.control-btn { font-size: 13px; padding: 12px 2px; } /* Για να χωράνε τα 3 στο κινητό */
 
     #fixed-back-btn {
         top: 15px; left: 15px; 
@@ -254,7 +258,7 @@ button.control-btn {
 <div id="tv-safe-area">
     <div id="main-grid">
         
-        <!-- ΑΡΙΣΤΕΡΑ / ΠΑΝΩ -->
+        <!-- ΑΡΙΣΤΕΡΑ -->
         <div class="left-panel">
             <div class="image-container">
                 <img id="art-image">
@@ -262,7 +266,7 @@ button.control-btn {
             <button id="enter-canvas-btn" onclick="enterCanvas()">🔍 Προβολή σε Καμβά</button>
         </div>
 
-        <!-- ΔΕΞΙΑ / ΚΑΤΩ -->
+        <!-- ΔΕΞΙΑ -->
         <div class="right-panel">
             <select id="category-select" onchange="getArt()">
                 <option value="Impressionism">🎨 Ιμπρεσιονισμός</option>
@@ -278,8 +282,10 @@ button.control-btn {
                 <div id="ai-fact">Το AI Curator είναι έτοιμο.</div>
             </div>
 
+            <!-- ΤΑ 3 ΚΟΥΜΠΙΑ -->
             <div class="btn-group">
                 <button id="next-btn" class="control-btn" onclick="getArt()">ΕΠΟΜΕΝΟ</button>
+                <button id="show-all-btn" class="control-btn" onclick="showAllText()" disabled>📖 ΟΛΟ</button>
                 <button id="auto-btn" class="control-btn" onclick="toggleAutoMode()">⏱️ AUTO (3λ)</button>
             </div>
         </div>
@@ -320,6 +326,23 @@ function toggleAutoMode() {
             autoInterval = null;
         }
     }
+}
+
+/* --- ΓΡΗΓΟΡΗ ΕΜΦΑΝΙΣΗ ΚΕΙΜΕΝΟΥ --- */
+let currentFullText = ""; // Αποθηκεύει το πλήρες κείμενο του AI
+
+function showAllText() {
+    if (!currentFullText) return;
+    
+    typingSession++; // Σκοτώνει αμέσως το αργό γράψιμο
+    
+    const factEl = document.getElementById('ai-fact');
+    factEl.innerHTML = currentFullText; // Εμφανίζει όλο το κείμενο ακαριαία
+    
+    // Πάει το scroll στην αρχή για να το διαβάσεις από πάνω
+    document.getElementById('scrollable-info').scrollTop = 0; 
+    
+    document.getElementById('show-all-btn').disabled = true; // Απενεργοποιεί το κουμπί
 }
 
 /* --- ΧΑΛΑΡΩΤΙΚΟ TYPEWRITER --- */
@@ -365,14 +388,18 @@ function typeWriterHTML(element, htmlString) {
 
             container.scrollTop = container.scrollHeight;
             setTimeout(type, delay);
+        } else {
+            // Όταν τελειώσει το γράψιμο κανονικά, απενεργοποιεί το κουμπί "ΟΛΟ"
+            document.getElementById('show-all-btn').disabled = true;
         }
     }
     type();
 }
 
-/* --- API & ΦΟΡΤΩΣΗ ΜΕ "ΕΞΥΠΝΗ" ΠΟΙΚΙΛΙΑ --- */
+/* --- API & ΦΟΡΤΩΣΗ --- */
 async function getArt(retryCount = 0) {
     const nextBtn = document.getElementById('next-btn');
+    const showAllBtn = document.getElementById('show-all-btn');
     const catSelect = document.getElementById('category-select');
     const img = document.getElementById('art-image');
     const titleEl = document.getElementById('art-title');
@@ -381,15 +408,14 @@ async function getArt(retryCount = 0) {
 
     if (retryCount === 0) {
         typingSession++; 
+        currentFullText = ""; // Καθαρίζει το προηγούμενο κείμενο
+        showAllBtn.disabled = true;
         nextBtn.disabled = true; catSelect.disabled = true;
         nextBtn.innerText = "..."; titleEl.innerText = "Αναζήτηση πίνακα..."; factEl.innerText = "";
         exitCanvas(); 
     }
 
     try {
-        // ΕΔΩ ΕΙΝΑΙ Η ΜΑΓΕΙΑ:
-        // Στην 1η προσπάθεια, ψάχνει στις σελίδες 1 έως 25 (Τεράστια ποικιλία)
-        // Αν αποτύχει, ψάχνει στις σελίδες 1 έως 3 (Σιγουριά για μικρές κατηγορίες)
         let maxPage = (retryCount === 0) ? 25 : 3;
         const page = Math.floor(Math.random() * maxPage) + 1;
         
@@ -416,9 +442,7 @@ async function getArt(retryCount = 0) {
         nextBtn.disabled = false; catSelect.disabled = false; nextBtn.innerText = "ΕΠΟΜΕΝΟ";
 
     } catch (error) {
-        // Αν αποτύχει, θα ξανατρέξει τη συνάρτηση με μικρότερο maxPage
         if (retryCount < 3) return getArt(retryCount + 1);
-        
         titleEl.innerText = "Αδυναμία φόρτωσης."; artistEl.innerText = "Μουσείο Chicago";
         factEl.innerText = "Δοκιμάστε να πατήσετε 'Επόμενο'.";
         nextBtn.disabled = false; catSelect.disabled = false; nextBtn.innerText = "ΕΠΟΜΕΝΟ";
@@ -427,6 +451,7 @@ async function getArt(retryCount = 0) {
 
 async function getAIFact(title, artist) {
     const factEl = document.getElementById('ai-fact');
+    const showAllBtn = document.getElementById('show-all-btn');
     
     typingSession++; 
     factEl.innerHTML = "<em>Ο AI Curator μελετά το έργο...</em>";
@@ -443,6 +468,10 @@ async function getAIFact(title, artist) {
         let formattedText = text.replace("🎯 Fun Fact:", "<strong>🎯 Fun Fact:</strong><br>")
                                 .replace("🎨 Ανάλυση:", "<br><br><strong>🎨 Ανάλυση:</strong><br>")
                                 .replace("🧠 Context:", "<br><br><strong>🧠 Context:</strong><br>");
+        
+        // Αποθηκεύουμε το κείμενο και ενεργοποιούμε το κουμπί "ΟΛΟ"
+        currentFullText = formattedText;
+        showAllBtn.disabled = false;
         
         typeWriterHTML(factEl, formattedText);
 
