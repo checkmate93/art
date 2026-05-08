@@ -6,16 +6,16 @@
 <title>Art Curator AI - TV Edition</title>
 
 <style>
-/* --- BASE VARIABLES & SETUP --- */
+/* =========================================
+   1. ΒΑΣΙΚΕΣ ΜΕΤΑΒΛΗΤΕΣ & RESET
+========================================= */
 :root { 
     --bg: #0f172a; 
     --panel-bg: #1e293b; 
     --accent: #fbbf24; 
-    --accent-hover: #f59e0b;
     --text: #f8fafc; 
     --text-muted: #cbd5e1;
-    --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    --safe-area: 4vmin; 
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -25,298 +25,278 @@
 }
 
 body { 
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+    font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; 
     background: var(--bg); 
     color: var(--text); 
-    font-size: 24px; 
+    font-size: 24px; /* Μεγάλα γράμματα για τηλεόραση */
     width: 100vw;
     height: 100vh;
-    overflow: hidden; 
+    overflow: hidden; /* Κλειδώνει το page scroll */
 }
 
-/* --- MAIN LAYOUT (60/40) --- */
-#tv-layout {
+/* =========================================
+   2. TV SAFE AREA & LAYOUT
+========================================= */
+#tv-safe-area {
+    padding: 40px; /* Safe Area για να μην κόβονται στοιχεία στις άκρες */
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+#main-grid {
     display: flex;
-    width: 100vw;
-    height: 100vh;
-    padding: var(--safe-area);
-    gap: 3vw;
-    transition: all 0.5s ease-in-out;
+    flex-direction: row; /* Side-by-side για TV */
+    gap: 40px; /* 'Αέρας' (Padding) ανάμεσα στις στήλες */
+    height: 100%;
+    width: 100%;
 }
 
-/* --- LEFT COLUMN (60%) --- */
-.left-col {
-    width: 60%;
+/* Αν η οθόνη είναι μικρή (π.χ. κινητό), γίνεται στήλη */
+@media (max-width: 1024px) {
+    #main-grid { flex-direction: column; overflow-y: auto; }
+}
+
+/* =========================================
+   3. ΑΡΙΣΤΕΡΗ ΣΤΗΛΗ (Εικόνα)
+========================================= */
+.left-panel {
+    flex: 6; /* 60% πλάτος */
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    position: relative;
-    background: radial-gradient(circle, rgba(30,41,59,0.5) 0%, rgba(15,23,42,0) 70%);
+    background: var(--panel-bg);
     border-radius: 20px;
-}
-
-.image-container {
-    width: 100%;
-    height: 85%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px; 
+    padding: 20px;
+    position: relative;
+    box-shadow: var(--shadow);
 }
 
 #art-image { 
-    width: 100%; 
-    height: 100%;
-    object-fit: contain;
+    width: 100%;
+    height: calc(100% - 80px); /* Αφήνει χώρο για το κουμπί */
+    object-fit: contain; /* Δεν παραμορφώνει, δεν κόβει */
     border-radius: 12px;
-    box-shadow: var(--shadow);
     display: none;
-    transition: transform 0.5s ease;
 }
 
-#fullscreen-btn {
-    position: absolute;
-    bottom: 20px;
+#enter-canvas-btn {
+    margin-top: 20px;
     background: rgba(15, 23, 42, 0.8);
     color: white;
-    border: 1px solid rgba(255,255,255,0.2);
+    border: 2px solid var(--accent);
     padding: 15px 30px;
     border-radius: 50px;
-    font-size: 20px;
+    font-size: 24px;
     cursor: pointer;
-    backdrop-filter: blur(5px);
-    transition: background 0.3s;
+    position: relative;
+    z-index: 10; /* Clickability fix */
 }
 
-#fullscreen-btn:hover {
-    background: var(--accent);
-    color: var(--bg);
-}
-
-/* ΝΕΟ: Κουμπί εξόδου από καμβά */
-#close-fullscreen-btn {
-    display: none;
-    position: absolute;
-    top: 30px;
-    right: 40px;
-    background: rgba(239, 68, 68, 0.9);
-    color: white;
-    border: none;
-    padding: 15px 30px;
-    border-radius: 50px;
-    font-size: 22px;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: var(--shadow);
-    z-index: 100;
-}
-
-#close-fullscreen-btn:hover {
-    background: #dc2626;
-}
-
-/* --- RIGHT COLUMN (40%) --- */
-.right-col {
-    width: 40%;
+/* =========================================
+   4. ΔΕΞΙΑ ΣΤΗΛΗ (Controls)
+========================================= */
+.right-panel {
+    flex: 4; /* 40% πλάτος */
     display: flex;
     flex-direction: column;
     gap: 20px;
     height: 100%;
 }
 
-.info-panel {
-    flex-grow: 1;
-    background: var(--panel-bg);
-    border-radius: 24px;
-    padding: 30px;
-    border: 1px solid rgba(255,255,255,0.05);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden; 
-}
-
-.scroll-area {
-    overflow-y: auto;
-    padding-right: 15px;
-    height: 100%;
-}
-
-.scroll-area::-webkit-scrollbar { width: 8px; }
-.scroll-area::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
-.scroll-area::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
-.scroll-area::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-#art-title { 
-    font-size: 38px; 
-    font-weight: 800; 
-    line-height: 1.2;
-    margin-bottom: 10px;
-}
-
-.artist-tag { 
-    font-size: 26px;
-    color: var(--accent); 
-    font-weight: 600;
-    margin-bottom: 25px; 
-    display: block; 
-}
-
+/* Dropdown - Z-index fix */
 select { 
     width: 100%; 
-    padding: 18px; 
-    border-radius: 14px; 
-    margin-bottom: 25px; 
+    padding: 20px; 
+    border-radius: 15px; 
     background: #0f172a; 
     color: white; 
     border: 2px solid #334155; 
-    font-size: 24px;
+    font-size: 26px;
     cursor: pointer;
+    position: relative;
+    z-index: 20; /* Πάνω από όλα για να πιάνει το κλικ του remote */
+    flex-shrink: 0;
 }
 
-.ai-section { 
-    background: rgba(15, 23, 42, 0.6); 
-    border-left: 6px solid var(--accent); 
-    padding: 25px; 
-    border-radius: 16px; 
-    display: none; 
+/* Container κειμένων */
+.info-box {
+    flex-grow: 1; /* Πιάνει τον διαθέσιμο χώρο */
+    background: var(--panel-bg);
+    border-radius: 20px;
+    padding: 30px;
+    overflow-y: auto; /* Scroll αν γεμίσει */
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
 }
 
-.label { 
-    font-size: 18px; 
+/* TV Scrollbar */
+.info-box::-webkit-scrollbar { width: 10px; }
+.info-box::-webkit-scrollbar-track { background: #0f172a; border-radius: 10px; }
+.info-box::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+
+#art-title { 
+    font-size: 36px; /* Μεγάλο font */
+    font-weight: bold; 
+    margin-bottom: 10px;
+    line-height: 1.2;
+}
+
+.artist-name { 
+    font-size: 28px;
     color: var(--accent); 
-    font-weight: 900; 
-    letter-spacing: 3px; 
-    display: block; 
-    margin-bottom: 15px; 
+    margin-bottom: 20px; 
 }
 
 #ai-fact { 
-    line-height: 1.6; 
     font-size: 24px;
-    color: var(--text-muted); 
-    white-space: pre-line; 
+    line-height: 1.6;
+    color: var(--text-muted);
 }
-
 #ai-fact strong { color: white; }
 
-/* Bottom: Action Buttons */
-.controls-panel {
+/* Κουμπιά (Κάτω μέρος) */
+.btn-group {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    flex-shrink: 0;
 }
 
 button {
-    font-family: inherit;
     border: none; 
-    padding: 22px;
-    border-radius: 18px; 
+    padding: 25px;
+    border-radius: 15px; 
+    font-size: 26px;
+    font-weight: bold;
     cursor: pointer; 
-    font-weight: 900; 
-    font-size: 24px;
-    width: 100%;
-    transition: transform 0.1s, opacity 0.3s;
+    position: relative;
+    z-index: 10;
 }
-
-button:active { transform: scale(0.98); }
 
 #next-btn { 
     background: var(--accent); 
     color: #0f172a; 
-    box-shadow: 0 10px 15px -3px rgba(251, 191, 36, 0.3);
 }
-
 #next-btn:disabled { 
     background: #475569; 
-    color: #94a3b8;
-    box-shadow: none;
+    color: #94a3b8; 
     cursor: not-allowed; 
 }
 
-#auto-btn {
-    background: #334155;
+#auto-btn { background: #334155; color: white; }
+#auto-btn.active { background: #ef4444; }
+
+/* =========================================
+   5. ΛΕΙΤΟΥΡΓΙΑ CANVAS (Fullscreen)
+========================================= */
+#fixed-back-btn {
+    display: none;
+    position: fixed; /* Πάντα σταθερό */
+    top: 40px; 
+    left: 40px; 
+    z-index: 9999; /* Το πιο ψηλό z-index σε όλο το app */
+    background: rgba(239, 68, 68, 0.9);
     color: white;
-    border: 2px solid #475569;
+    padding: 20px 40px;
+    font-size: 28px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.8);
 }
 
-#auto-btn.active {
-    background: #ef4444;
-    border-color: #ef4444;
+body.canvas-mode #main-grid { display: none; } /* Κρύβει το grid */
+body.canvas-mode #fixed-back-btn { display: block; } /* Δείχνει το Back */
+body.canvas-mode {
+    background: black; /* Μαύρο φόντο για τον πίνακα */
 }
-
-/* --- FULLSCREEN MODE --- */
-.is-fullscreen .right-col { display: none; }
-.is-fullscreen .left-col { width: 100%; background: none; cursor: pointer; }
-.is-fullscreen #art-image { width: 95vw; height: 95vh; }
-.is-fullscreen #fullscreen-btn { display: none; }
-.is-fullscreen #close-fullscreen-btn { display: block; }
-
+body.canvas-mode #canvas-image-container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+body.canvas-mode #art-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
 </style>
 </head>
 
 <body>
 
-<div id="tv-layout">
-    <!-- Αριστερή Στήλη: Καμβάς -->
-    <!-- Πρόσθεσα onClick στο panel ώστε να βγαίνει πατώντας οπουδήποτε όταν είναι fullscreen -->
-    <div class="left-col" id="left-panel" onclick="if(document.getElementById('tv-layout').classList.contains('is-fullscreen')) exitFullscreen()">
+<div id="tv-safe-area">
+    
+    <!-- Fixed Κουμπί Επιστροφής (Αρχικά κρυμμένο) -->
+    <button id="fixed-back-btn" onclick="exitCanvas()">⬅ ΕΠΙΣΤΡΟΦΗ</button>
+
+    <!-- Το Κυρίως Grid -->
+    <div id="main-grid">
         
-        <button id="close-fullscreen-btn" onclick="exitFullscreen()">❌ ΕΠΙΣΤΡΟΦΗ</button>
-
-        <div class="image-container">
+        <!-- Αριστερά: Εικόνα -->
+        <div class="left-panel">
             <img id="art-image">
+            <button id="enter-canvas-btn" onclick="enterCanvas()">🔍 Προβολή σε Καμβά</button>
         </div>
-        <button id="fullscreen-btn" onclick="enterFullscreen(event)">🔍 Προβολή σε Καμβά</button>
-    </div>
 
-    <!-- Δεξιά Στήλη: Πληροφορίες & Κουμπιά -->
-    <div class="right-col">
-        <div class="info-panel">
-            <div class="scroll-area">
-                <select id="category-select" onchange="getArt()">
-                    <option value="Impressionism">🎨 Ιμπρεσιονισμός</option>
-                    <option value="Renaissance">🏰 Αναγέννηση</option>
-                    <option value="Ancient Greek Art">🏺 Αρχαία Ελληνική Τέχνη</option>
-                    <option value="Japanese Art">🌊 Ιαπωνική Τέχνη</option>
-                    <option value="Surrealism">👁️ Σουρεαλισμός</option>
-                </select>
+        <!-- Δεξιά: Controls & Πληροφορίες -->
+        <div class="right-panel">
+            
+            <select id="category-select" onchange="getArt()">
+                <option value="Impressionism">🎨 Ιμπρεσιονισμός</option>
+                <option value="Renaissance">🏰 Αναγέννηση</option>
+                <option value="Ancient Greek Art">🏺 Αρχαία Ελληνική Τέχνη</option>
+                <option value="Japanese Art">🌊 Ιαπωνική Τέχνη</option>
+                <option value="Surrealism">👁️ Σουρεαλισμός</option>
+            </select>
 
+            <div class="info-box">
                 <h1 id="art-title">Curiosity Gallery</h1>
-                <span id="artist-name" class="artist-tag">Επιλέξτε κατηγορία...</span>
-                
-                <div class="ai-section" id="ai-container">
-                    <span class="label">AI CURATOR</span>
-                    <p id="ai-fact"></p>
-                </div>
+                <div id="artist-name" class="artist-name">Επιλέξτε κατηγορία...</div>
+                <div id="ai-fact">Το AI Curator είναι έτοιμο.</div>
             </div>
-        </div>
 
-        <div class="controls-panel">
-            <button id="next-btn" onclick="getArt()">ΕΠΟΜΕΝΟ</button>
-            <button id="auto-btn" onclick="toggleAutoMode()">⏱️ ΑΥΤΟΜΑΤΗ ΕΝΑΛΛΑΓΗ (3 λεπτά)</button>
+            <div class="btn-group">
+                <button id="next-btn" onclick="getArt()">ΕΠΟΜΕΝΟ ΈΡΓΟ</button>
+                <button id="auto-btn" onclick="toggleAutoMode()">⏱️ ΑΥΤΟΜΑΤΗ ΕΝΑΛΛΑΓΗ</button>
+            </div>
+
         </div>
     </div>
+
 </div>
 
 <script>
-// --- FULLSCREEN LOGIC ---
-const layout = document.getElementById('tv-layout');
-
-function enterFullscreen(event) {
-    event.stopPropagation(); // Σταματάει το click από το να διαβαστεί παραπάνω
-    layout.classList.add('is-fullscreen');
+/* =========================================
+   ΛΕΙΤΟΥΡΓΙΑ ΚΑΜΒΑ (Fullscreen Fix)
+========================================= */
+function enterCanvas() {
+    document.body.classList.add('canvas-mode');
+    // Μεταφέρουμε την εικόνα εκτός grid για να πιάσει όλη την οθόνη
+    const img = document.getElementById('art-image');
+    let container = document.getElementById('canvas-image-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'canvas-image-container';
+        document.body.appendChild(container);
+    }
+    container.appendChild(img);
 }
 
-function exitFullscreen() {
-    layout.classList.remove('is-fullscreen');
+function exitCanvas() {
+    document.body.classList.remove('canvas-mode');
+    // Επιστροφή της εικόνας στο grid
+    const img = document.getElementById('art-image');
+    document.querySelector('.left-panel').insertBefore(img, document.getElementById('enter-canvas-btn'));
 }
 
-document.addEventListener('keydown', (e) => {
-    if (e.key === "Escape") exitFullscreen();
-});
-
-// --- AUTO CYCLE LOGIC ---
+/* =========================================
+   ΑΥΤΟΜΑΤΗ ΕΝΑΛΛΑΓΗ
+========================================= */
 let autoInterval;
 let isAutoMode = false;
 
@@ -326,70 +306,94 @@ function toggleAutoMode() {
 
     if (isAutoMode) {
         btn.classList.add('active');
-        btn.innerText = "🛑 ΔΙΑΚΟΠΗ ΕΝΑΛΛΑΓΗΣ";
+        btn.innerText = "🛑 ΔΙΑΚΟΠΗ (3 λεπτά)";
         getArt(); 
-        autoInterval = setInterval(getArt, 180000); // 3 λεπτά
+        autoInterval = setInterval(getArt, 180000); 
     } else {
         btn.classList.remove('active');
-        btn.innerText = "⏱️ ΑΥΤΟΜΑΤΗ ΕΝΑΛΛΑΓΗ (3 λεπτά)";
+        btn.innerText = "⏱️ ΑΥΤΟΜΑΤΗ ΕΝΑΛΛΑΓΗ";
         clearInterval(autoInterval);
     }
 }
 
-// --- API & DATA LOGIC ---
+/* =========================================
+   API & ERROR HANDLING (Το "Ξεκλείδωμα")
+========================================= */
 async function getArt() {
-    const btn = document.getElementById('next-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const catSelect = document.getElementById('category-select');
     const img = document.getElementById('art-image');
-    const category = document.getElementById('category-select').value;
-    const aiContainer = document.getElementById('ai-container');
+    const category = catSelect.value;
+    
+    const titleEl = document.getElementById('art-title');
+    const artistEl = document.getElementById('artist-name');
+    const factEl = document.getElementById('ai-fact');
 
-    btn.disabled = true;
-    btn.innerText = "Φόρτωση Έργου...";
-    aiContainer.style.display = "none";
-    exitFullscreen();
+    // 1. ΚΛΕΙΔΩΜΑ UI
+    nextBtn.disabled = true;
+    catSelect.disabled = true;
+    nextBtn.innerText = "Φόρτωση...";
+    titleEl.innerText = "Αναζήτηση πίνακα...";
+    factEl.innerText = "";
+    exitCanvas();
 
     try {
+        // 2. FETCH ΑΠΟ CHICAGO ART INSTITUTE
         const page = Math.floor(Math.random() * 30) + 1;
         const res = await fetch(`https://api.artic.edu/api/v1/artworks/search?q=${category}&page=${page}&limit=12&fields=id,title,artist_title,image_id`);
+        
+        if (!res.ok) throw new Error("Αποτυχία δικτύου");
+        
         const data = await res.json();
-
         const validArt = data.data.filter(a => a.image_id);
+        
+        if (validArt.length === 0) throw new Error("Δεν βρέθηκαν εικόνες");
+        
         const art = validArt[Math.floor(Math.random() * validArt.length)];
 
-        document.getElementById('art-title').innerText = art.title;
-        document.getElementById('artist-name').innerText = art.artist_title || "Άγνωστος Καλλιτέχνης";
+        // Ενημέρωση Κειμένων
+        titleEl.innerText = art.title;
+        artistEl.innerText = art.artist_title || "Άγνωστος Καλλιτέχνης";
 
-        img.src = `https://www.artic.edu/iiif/2/${art.image_id}/full/800,/0/default.jpg`;
+        // 3. PROMISE ΓΙΑ ΤΗ ΦΟΡΤΩΣΗ ΤΗΣ ΕΙΚΟΝΑΣ 
+        // Αν δεν φορτώσει η εικόνα, πετάει error και πάει στο catch!
+        await new Promise((resolve, reject) => {
+            img.onload = () => resolve();
+            img.onerror = () => reject(new Error("Η εικόνα απέτυχε να φορτώσει"));
+            img.src = `https://www.artic.edu/iiif/2/${art.image_id}/full/800,/0/default.jpg`;
+        });
+
         img.style.display = "block";
 
-        img.onload = () => {
-            btn.disabled = false;
-            btn.innerText = "ΕΠΟΜΕΝΟ";
-            getAIFact(art.title, art.artist_title);
-        };
+        // Αν όλα πήγαν καλά με την εικόνα, ξεκινάμε το AI
+        getAIFact(art.title, art.artist_title);
 
-    } catch (e) {
-        btn.innerText = "ΞΑΝΑΠΡΟΣΠΑΘΕΙΑ";
-        btn.disabled = false;
+    } catch (error) {
+        console.error("Σφάλμα:", error);
+        titleEl.innerText = "Σφάλμα. Πατήστε Επόμενο.";
+        factEl.innerText = "Υπήρξε πρόβλημα με τη φόρτωση του πίνακα. Δοκιμάστε ξανά.";
+    } finally {
+        // 4. TO ΚΡΙΣΙΜΟ ΒΗΜΑ (FINALLY): 
+        // Ξεκλειδώνει ΠΑΝΤΑ, είτε πέτυχε το try, είτε έσκασε στο catch
+        nextBtn.disabled = false;
+        catSelect.disabled = false;
+        nextBtn.innerText = "ΕΠΟΜΕΝΟ ΕΡΓΟ";
     }
 }
 
 async function getAIFact(title, artist) {
-    const factDiv = document.getElementById('ai-fact');
-    const container = document.getElementById('ai-container');
-
-    factDiv.innerText = "Ο AI Curator μελετά το έργο...";
-    container.style.display = "block";
+    const factEl = document.getElementById('ai-fact');
+    factEl.innerText = "Ο AI Curator μελετά το έργο...";
 
     try {
-        // ΕΔΩ ΜΠΗΚΕ ΤΟ ΔΙΚΟ ΣΟΥ RENDER URL!
+        // ΧΡΗΣΗ ΤΟΥ ΣΩΣΤΟΥ RENDER URL ΣΟΥ!
         const response = await fetch("https://art-b2pg.onrender.com/api/groq", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ title, artist })
         });
+
+        if (!response.ok) throw new Error("AI Error");
 
         const data = await response.json();
         let text = data.choices[0].message.content;
@@ -399,13 +403,14 @@ async function getAIFact(title, artist) {
             .replace("🎨 Ανάλυση:", "<br><br><strong>🎨 Ανάλυση:</strong><br>")
             .replace("🧠 Context:", "<br><br><strong>🧠 Context:</strong><br>");
 
-        factDiv.innerHTML = text;
+        factEl.innerHTML = text;
 
-    } catch {
-        factDiv.innerText = "Σφάλμα επικοινωνίας με τον AI Curator. (Μήπως αργεί να ξυπνήσει ο server;)";
+    } catch (error) {
+        factEl.innerText = "Το AI Curator κάνει διάλειμμα. Δοκιμάστε άλλο έργο.";
     }
 }
 
+// Εκκίνηση
 window.onload = getArt;
 </script>
 
