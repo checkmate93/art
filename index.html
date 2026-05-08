@@ -264,7 +264,7 @@ function toggleAutoMode() {
     }
 }
 
-/* --- ΧΑΛΑΡΩΤΙΚΟ TYPEWRITER ΜΕ ΑΝΘΡΩΠΙΝΕΣ ΠΑΥΣΕΙΣ --- */
+/* --- ΧΑΛΑΡΩΤΙΚΟ TYPEWRITER (ΜΙΣΗ ΤΑΧΥΤΗΤΑ / 5sec ΠΑΥΣΗ) --- */
 let typingSession = 0; 
 
 function typeWriterHTML(element, htmlString) {
@@ -276,21 +276,20 @@ function typeWriterHTML(element, htmlString) {
     let i = 0;
 
     function type() {
-        if (currentSession !== typingSession) return; // Σταματάει αν πατήσεις "Επόμενο"
+        if (currentSession !== typingSession) return; 
 
         if (i < htmlString.length) {
             let char = htmlString.charAt(i);
             
-            // Η βασική αργή και χαλαρή ταχύτητα (40ms ανά γράμμα)
-            let delay = 40; 
+            // ΜΙΣΗ ΤΑΧΥΤΗΤΑ: Το 40ms έγινε 80ms (πιο αργό και νωχελικό)
+            let delay = 80; 
 
-            // Αν βρει κώδικα (π.χ. <strong>) τον βάζει ακαριαία για να μην χαλάσει το στυλ
             if (char === '<') {
                 let tagEnd = htmlString.indexOf('>', i);
                 if (tagEnd !== -1) {
                     element.innerHTML += htmlString.substring(i, tagEnd + 1);
                     i = tagEnd + 1;
-                    delay = 0; // Ακαριαία ταχυτητα για τον κώδικα
+                    delay = 0; 
                 } else {
                     element.innerHTML += char;
                     i++;
@@ -299,21 +298,22 @@ function typeWriterHTML(element, htmlString) {
                 element.innerHTML += char;
                 i++;
                 
-                // --- ΟΙ ΑΝΘΡΩΠΙΝΕΣ "ΑΝΑΣΕΣ" ---
-                // Αν βρει τελεία ή θαυμαστικό, σταματάει για μισό δευτερόλεπτο!
-                if (char === '.' || char === '!' || char === '?' || char === ':') {
-                    delay += 400; 
+                // --- ΟΙ ΑΝΑΣΕΣ ΠΟΥ ΖΗΤΗΣΕΣ ---
+                // Τελεία, Θαυμαστικό, Ερωτηματικό: 5 ΟΛΟΚΛΗΡΑ ΔΕΥΤΕΡΟΛΕΠΤΑ (5000ms)
+                if (char === '.' || char === '!' || char === '?') {
+                    delay += 5000; 
                 } 
-                // Αν βρει κόμμα, κάνει μια μικρή παύση
+                // Άνω κάτω τελεία (πχ μετά το "Ανάλυση:"): 2.5 δευτερόλεπτα
+                else if (char === ':') {
+                    delay += 2500;
+                }
+                // Κόμμα: Μικρή ανάσα
                 else if (char === ',') {
-                    delay += 150; 
+                    delay += 300; 
                 }
             }
 
-            // Αυτόματο scroll πάντα προς τα κάτω
             container.scrollTop = container.scrollHeight;
-
-            // Καλεί το επόμενο γράμμα με την υπολογισμένη καθυστέρηση
             setTimeout(type, delay);
         }
     }
@@ -330,7 +330,7 @@ async function getArt(retryCount = 0) {
     const factEl = document.getElementById('ai-fact');
 
     if (retryCount === 0) {
-        typingSession++; // Σταματάει το προηγούμενο γράψιμο
+        typingSession++; 
         nextBtn.disabled = true; catSelect.disabled = true;
         nextBtn.innerText = "..."; titleEl.innerText = "Αναζήτηση πίνακα..."; factEl.innerText = "";
         exitCanvas(); 
@@ -383,12 +383,10 @@ async function getAIFact(title, artist) {
         if (!response.ok) throw new Error("AI Error");
         let text = (await response.json()).choices[0].message.content;
         
-        // Μορφοποίηση κειμένου
         let formattedText = text.replace("🎯 Fun Fact:", "<strong>🎯 Fun Fact:</strong><br>")
                                 .replace("🎨 Ανάλυση:", "<br><br><strong>🎨 Ανάλυση:</strong><br>")
                                 .replace("🧠 Context:", "<br><br><strong>🧠 Context:</strong><br>");
         
-        // Κλήση της νέας, χαλαρωτικής συνάρτησης Typewriter!
         typeWriterHTML(factEl, formattedText);
 
     } catch {
