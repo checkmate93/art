@@ -1,16 +1,3 @@
-Χαίρομαι πάρα πολύ που όλα λειτουργούν άψογα! 
-
-Έκανα **ακριβώς τη "δίαιτα" που ζήτησες** στο περιβάλλον (UI) για να δώσουμε τον μέγιστο δυνατό χώρο στο κείμενο του AI:
-
-1. **Αριστερά (Εικόνα):** Μίκρυνα πολύ το γκρι "κουτί" γύρω από την εικόνα (λιγότερο padding) και ανάγκασα την εικόνα να απλωθεί και να πιάσει όλο τον διαθέσιμο χώρο μέσα του.
-2. **Δεξιά Επάνω (Επιλογή & Τίτλοι):** Το dropdown (επιλογή κατηγορίας) έγινε πολύ πιο διακριτικό και μικρό. Ο τίτλος του έργου και το όνομα του καλλιτέχνη μίκρυναν αισθητά.
-3. **Δεξιά Κάτω (Κουμπιά):** Μπήκαν **δίπλα-δίπλα στην ίδια σειρά**, στο κάτω μέρος της οθόνης. Έγιναν αρκετά μικρότερα, και μίκρυνα λίγο το κείμενό τους (π.χ. "AUTO (1.5λ)") για να χωράνε τέλεια δίπλα-δίπλα.
-
-Με όλες αυτές τις αλλαγές, το "κουτί" με τα σχόλια του AI πλέον έχει **τεράστιο χώρο** και θα διαβάζεται συνήθως χωρίς καθόλου scroll!
-
-Αντέγραψε και επικόλλησε αυτόν τον νέο κώδικα στο `index.html`:
-
-```html
 <!DOCTYPE html>
 <html lang="el">
 <head>
@@ -64,21 +51,21 @@ body {
    3. ΑΡΙΣΤΕΡΗ ΣΤΗΛΗ (Εικόνα)
 ========================================= */
 .left-panel {
-    flex: 6; /* 60% πλάτος */
+    flex: 6; 
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     background: var(--panel-bg);
     border-radius: 15px;
-    padding: 10px; /* ΠΟΛΥ μικρότερο κουτί / στενό γύρω από την εικόνα */
+    padding: 10px; 
     position: relative;
     box-shadow: var(--shadow);
 }
 
 #art-image { 
     width: 100%;
-    height: calc(100% - 45px); /* Μεγαλύτερος χώρος για την εικόνα */
+    height: calc(100% - 45px); 
     object-fit: contain; 
     border-radius: 8px;
     display: none;
@@ -89,7 +76,7 @@ body {
     background: rgba(15, 23, 42, 0.8);
     color: white;
     border: 1px solid var(--accent);
-    padding: 6px 16px; /* Πολύ διακριτικό κουμπάκι */
+    padding: 6px 16px; 
     border-radius: 20px;
     font-size: 14px;
     cursor: pointer;
@@ -101,7 +88,7 @@ body {
    4. ΔΕΞΙΑ ΣΤΗΛΗ (Controls)
 ========================================= */
 .right-panel {
-    flex: 4; /* 40% πλάτος */
+    flex: 4; 
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -110,12 +97,12 @@ body {
 
 select { 
     width: 100%; 
-    padding: 8px 12px; /* Πολύ πιο στενό */
+    padding: 8px 12px; 
     border-radius: 8px; 
     background: #0f172a; 
     color: white; 
     border: 1px solid #334155; 
-    font-size: 16px; /* Μικρότερη γραμματοσειρά */
+    font-size: 16px; 
     cursor: pointer;
     position: relative;
     z-index: 20; 
@@ -123,7 +110,7 @@ select {
 }
 
 .info-box {
-    flex-grow: 1; /* Πιάνει όλο τον χώρο της οθόνης ανάμεσα σε τίτλο και κουμπιά */
+    flex-grow: 1; 
     background: var(--panel-bg);
     border-radius: 15px;
     padding: 20px;
@@ -138,39 +125,38 @@ select {
 .info-box::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
 
 #art-title { 
-    font-size: 22px; /* Πολύ μικρότερος τίτλος */
+    font-size: 22px; 
     font-weight: bold; 
     margin-bottom: 5px;
     line-height: 1.2;
 }
 
 .artist-name { 
-    font-size: 16px; /* Μικρότερο όνομα */
+    font-size: 16px; 
     color: var(--accent); 
     margin-bottom: 15px; 
 }
 
 #ai-fact { 
-    font-size: 18px; /* Μέγεθος ιδανικό για να διαβάζεται αλλά να χωράνε πολλά */
+    font-size: 18px; 
     line-height: 1.5;
     color: var(--text-muted);
 }
 #ai-fact strong { color: white; }
 
-/* ΝΕΑ ΔΙΑΤΑΞΗ: Κουμπιά δίπλα-δίπλα (Row) */
 .btn-group {
     display: flex;
-    flex-direction: row; /* Δίπλα δίπλα! */
+    flex-direction: row; 
     gap: 10px;
     flex-shrink: 0;
 }
 
 button.control-btn {
-    flex: 1; /* Πιάνουν από 50% του χώρου το καθένα */
+    flex: 1; 
     border: none; 
-    padding: 12px 5px; /* Μικρότερο ύψος */
+    padding: 12px 5px; 
     border-radius: 10px; 
-    font-size: 16px; /* Μικρότερα γράμματα */
+    font-size: 16px; 
     font-weight: bold;
     cursor: pointer; 
     position: relative;
@@ -228,7 +214,6 @@ button.control-btn {
 
 <body>
 
-<!-- ΤΟ OVERLAY ΚΑΜΒΑ -->
 <div id="fullscreen-overlay">
     <button id="fixed-back-btn" onclick="exitCanvas()">⬅ ΕΠΙΣΤΡΟΦΗ</button>
     <img id="fullscreen-image">
@@ -236,17 +221,12 @@ button.control-btn {
 
 <div id="tv-safe-area">
     <div id="main-grid">
-        
-        <!-- Αριστερά: Εικόνα (Τώρα με στενότερο κουτί) -->
         <div class="left-panel">
             <img id="art-image">
             <button id="enter-canvas-btn" onclick="enterCanvas()">🔍 Καμβάς</button>
         </div>
 
-        <!-- Δεξιά: Controls & Πληροφορίες -->
         <div class="right-panel">
-            
-            <!-- Μικρότερο Dropdown -->
             <select id="category-select" onchange="getArt()">
                 <option value="Impressionism">🎨 Ιμπρεσιονισμός</option>
                 <option value="Renaissance">🏰 Αναγέννηση</option>
@@ -255,19 +235,16 @@ button.control-btn {
                 <option value="Surrealism">👁️ Σουρεαλισμός</option>
             </select>
 
-            <!-- Περιοχή Κειμένου (Τώρα με τεράστιο χώρο) -->
             <div class="info-box">
                 <h1 id="art-title">Curiosity Gallery</h1>
                 <div id="artist-name" class="artist-name">Επιλέξτε...</div>
                 <div id="ai-fact">Το AI Curator φορτώνει...</div>
             </div>
 
-            <!-- Κουμπιά Δίπλα-Δίπλα -->
             <div class="btn-group">
                 <button id="next-btn" class="control-btn" onclick="getArt()">ΕΠΟΜΕΝΟ</button>
                 <button id="auto-btn" class="control-btn" onclick="toggleAutoMode()">⏱️ AUTO (1.5λ)</button>
             </div>
-
         </div>
     </div>
 </div>
@@ -286,7 +263,7 @@ function exitCanvas() {
     document.getElementById('fullscreen-overlay').style.display = 'none';
 }
 
-/* --- ΑΥΤΟΜΑΤΗ ΕΝΑΛΛΑΓΗ (1.5 λεπτό = 90.000 ms) --- */
+/* --- ΑΥΤΟΜΑΤΗ ΕΝΑΛΛΑΓΗ (1.5 λεπτό) --- */
 let autoInterval;
 let isAutoMode = false;
 
@@ -306,8 +283,8 @@ function toggleAutoMode() {
     }
 }
 
-/* --- API & ΦΟΡΤΩΣΗ --- */
-async function getArt() {
+/* --- API & ΦΟΡΤΩΣΗ (ΜΕ ΕΞΥΠΝΟ AUTO-RETRY) --- */
+async function getArt(retryCount = 0) {
     const nextBtn = document.getElementById('next-btn');
     const catSelect = document.getElementById('category-select');
     const img = document.getElementById('art-image');
@@ -316,40 +293,66 @@ async function getArt() {
     const artistEl = document.getElementById('artist-name');
     const factEl = document.getElementById('ai-fact');
 
-    nextBtn.disabled = true;
-    catSelect.disabled = true;
-    nextBtn.innerText = "...";
-    titleEl.innerText = "Αναζήτηση...";
-    factEl.innerText = "";
-    exitCanvas(); 
+    // Κλειδώνουμε το UI μόνο στην πρώτη προσπάθεια
+    if (retryCount === 0) {
+        nextBtn.disabled = true;
+        catSelect.disabled = true;
+        nextBtn.innerText = "...";
+        titleEl.innerText = "Αναζήτηση πίνακα...";
+        factEl.innerText = "";
+        exitCanvas(); 
+    }
 
     try {
-        const page = Math.floor(Math.random() * 30) + 1;
+        // Ψάχνουμε σε ασφαλείς σελίδες (1 έως 5) για να σιγουρευτούμε ότι υπάρχουν έργα
+        const page = Math.floor(Math.random() * 5) + 1;
         const res = await fetch(`https://api.artic.edu/api/v1/artworks/search?q=${category}&page=${page}&limit=12&fields=id,title,artist_title,image_id`);
+        
         if (!res.ok) throw new Error("Net Error");
         
         const data = await res.json();
-        const validArt = data.data.filter(a => a.image_id);
-        if (validArt.length === 0) throw new Error("No Img");
         
+        // Φιλτράρουμε αυτούς που ΕΧΟΥΝ φωτογραφία
+        const validArt = data.data.filter(a => a.image_id);
+        
+        if (validArt.length === 0) {
+            throw new Error("No Img on this page");
+        }
+        
+        // Διαλέγουμε έναν τυχαίο πίνακα
         const art = validArt[Math.floor(Math.random() * validArt.length)];
 
         titleEl.innerText = art.title;
-        artistEl.innerText = art.artist_title || "Άγνωστος";
+        artistEl.innerText = art.artist_title || "Άγνωστος Καλλιτέχνης";
 
+        // Φορτώνουμε την εικόνα
         await new Promise((resolve, reject) => {
             img.onload = () => resolve();
-            img.onerror = () => reject(new Error("Img Error"));
+            img.onerror = () => reject(new Error("Img Load Error"));
             img.src = `https://www.artic.edu/iiif/2/${art.image_id}/full/800,/0/default.jpg`;
         });
 
         img.style.display = "block";
         getAIFact(art.title, art.artist_title);
 
+        // Ξεκλείδωμα αν πέτυχε
+        nextBtn.disabled = false;
+        catSelect.disabled = false;
+        nextBtn.innerText = "ΕΠΟΜΕΝΟ";
+
     } catch (error) {
-        titleEl.innerText = "Σφάλμα.";
-        factEl.innerText = "Δοκιμάστε ξανά.";
-    } finally {
+        console.warn("Αποτυχία φόρτωσης, προσπάθεια ξανά...", error);
+        
+        // Αν αποτύχει, ΞΑΝΑΔΟΚΙΜΑΖΕΙ μόνο του μέχρι 3 φορές
+        if (retryCount < 3) {
+            return getArt(retryCount + 1);
+        }
+        
+        // Αν αποτύχει 3 φορές συνεχόμενα, τότε μόνο δείχνει το σφάλμα
+        titleEl.innerText = "Αδυναμία φόρτωσης.";
+        artistEl.innerText = "Μουσείο Chicago";
+        factEl.innerText = "Η εικόνα δεν βρέθηκε στη βάση του μουσείου. Δοκιμάστε να πατήσετε 'Επόμενο' ή αλλάξτε κατηγορία.";
+        
         nextBtn.disabled = false;
         catSelect.disabled = false;
         nextBtn.innerText = "ΕΠΟΜΕΝΟ";
@@ -380,7 +383,7 @@ async function getAIFact(title, artist) {
         factEl.innerHTML = text;
 
     } catch (error) {
-        factEl.innerText = "Αδυναμία σύνδεσης με AI.";
+        factEl.innerText = "Το AI Curator κάνει ένα μικρό διάλειμμα. Πατήστε 'Επόμενο' για νέο έργο!";
     }
 }
 
@@ -389,4 +392,3 @@ window.onload = getArt;
 
 </body>
 </html>
-```
