@@ -26,7 +26,7 @@ body {
     color: var(--text); 
     width: 100vw;
     height: 100vh;
-    height: 100dvh; /* Λύνει το πρόβλημα με την μπάρα του Safari στα iPhone! */
+    height: 100dvh; 
     overflow: hidden; 
 }
 
@@ -202,11 +202,10 @@ button.control-btn {
     #tv-safe-area { padding: 15px; }
     
     #main-grid { 
-        flex-direction: column; /* Το μαγικό "σπάσιμο" σε στήλη */
+        flex-direction: column; 
         gap: 15px; 
     }
 
-    /* Η εικόνα πάει πάνω και παίρνει το 40% του ύψους */
     .left-panel { 
         flex: none; 
         height: 40vh; 
@@ -219,7 +218,6 @@ button.control-btn {
         margin-top: 8px;
     }
 
-    /* Τα Controls πάνε κάτω και γεμίζουν την υπόλοιπη οθόνη */
     .right-panel { 
         flex: 1; 
         min-height: 0; 
@@ -256,7 +254,7 @@ button.control-btn {
 <div id="tv-safe-area">
     <div id="main-grid">
         
-        <!-- ΑΡΙΣΤΕΡΑ / ΠΑΝΩ ΣΤΑ ΚΙΝΗΤΑ -->
+        <!-- ΑΡΙΣΤΕΡΑ / ΠΑΝΩ -->
         <div class="left-panel">
             <div class="image-container">
                 <img id="art-image">
@@ -264,7 +262,7 @@ button.control-btn {
             <button id="enter-canvas-btn" onclick="enterCanvas()">🔍 Προβολή σε Καμβά</button>
         </div>
 
-        <!-- ΔΕΞΙΑ / ΚΑΤΩ ΣΤΑ ΚΙΝΗΤΑ -->
+        <!-- ΔΕΞΙΑ / ΚΑΤΩ -->
         <div class="right-panel">
             <select id="category-select" onchange="getArt()">
                 <option value="Impressionism">🎨 Ιμπρεσιονισμός</option>
@@ -372,7 +370,7 @@ function typeWriterHTML(element, htmlString) {
     type();
 }
 
-/* --- API & ΦΟΡΤΩΣΗ --- */
+/* --- API & ΦΟΡΤΩΣΗ ΜΕ "ΕΞΥΠΝΗ" ΠΟΙΚΙΛΙΑ --- */
 async function getArt(retryCount = 0) {
     const nextBtn = document.getElementById('next-btn');
     const catSelect = document.getElementById('category-select');
@@ -389,7 +387,12 @@ async function getArt(retryCount = 0) {
     }
 
     try {
-        const page = Math.floor(Math.random() * 5) + 1;
+        // ΕΔΩ ΕΙΝΑΙ Η ΜΑΓΕΙΑ:
+        // Στην 1η προσπάθεια, ψάχνει στις σελίδες 1 έως 25 (Τεράστια ποικιλία)
+        // Αν αποτύχει, ψάχνει στις σελίδες 1 έως 3 (Σιγουριά για μικρές κατηγορίες)
+        let maxPage = (retryCount === 0) ? 25 : 3;
+        const page = Math.floor(Math.random() * maxPage) + 1;
+        
         const res = await fetch(`https://api.artic.edu/api/v1/artworks/search?q=${catSelect.value}&page=${page}&limit=12&fields=id,title,artist_title,image_id`);
         if (!res.ok) throw new Error("Net Error");
         
@@ -413,7 +416,9 @@ async function getArt(retryCount = 0) {
         nextBtn.disabled = false; catSelect.disabled = false; nextBtn.innerText = "ΕΠΟΜΕΝΟ";
 
     } catch (error) {
+        // Αν αποτύχει, θα ξανατρέξει τη συνάρτηση με μικρότερο maxPage
         if (retryCount < 3) return getArt(retryCount + 1);
+        
         titleEl.innerText = "Αδυναμία φόρτωσης."; artistEl.innerText = "Μουσείο Chicago";
         factEl.innerText = "Δοκιμάστε να πατήσετε 'Επόμενο'.";
         nextBtn.disabled = false; catSelect.disabled = false; nextBtn.innerText = "ΕΠΟΜΕΝΟ";
